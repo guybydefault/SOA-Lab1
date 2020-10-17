@@ -1,0 +1,12 @@
+<div>
+  <app-sort-settings (sortUpdated)="sortUpdated($event)">
+  </app-sort-settings>
+</div>
+<div>
+  <app-filter-settings (filterUpdated)="filterUpdated($event)">
+  </app-filter-settings>
+</div>
+<div>
+  <app-flat-table [flats]="flats">
+  </app-flat-table>
+</div>

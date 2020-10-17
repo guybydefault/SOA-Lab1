@@ -1,0 +1,6 @@
+<select>
+  <option *ngFor="let field of fields" [value]="field.property">{{field.name}}</option>
+</select>
+<select>
+  <option *ngFor="let op of comparisonOperations" [value]="op.operation">{{op.name}}</option>
+</select>

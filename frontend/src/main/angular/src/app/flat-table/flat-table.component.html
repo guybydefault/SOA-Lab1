@@ -1,0 +1,28 @@
+<table>
+  <tr>
+    <th>ID</th>
+    <th>Name</th>
+    <th>Creation date</th>
+    <th>Area</th>
+    <th>Number of rooms</th>
+    <th>Furnish</th>
+    <th>View</th>
+    <th>Transport</th>
+    <th>Coordinates</th>
+    <th>House info</th>
+  </tr>
+  <tr *ngFor="let flat of flats">
+    <td>{{flat.id}}</td>
+    <td>{{flat.name}}</td>
+    <td>{{flat.creationDate | date:'medium'}}</td>
+    <td>{{flat.area}}</td>
+    <td>{{flat.numberOfRooms}}</td>
+    <td>{{flat.furnish}}</td>
+    <td>{{flat.view}}</td>
+    <td>{{flat.transport}}</td>
+    <td>({{flat.coordinates.x}}; {{flat.coordinates.y}})</td>
+    <td>{{flat.house.name}} (built in {{flat.house.year}}, {{flat.house.numberOfFloors}}
+      floors, {{flat.house.numberOfFlatsOnFloor}} flats on floor, {{flat.house.numberOfLifts}} lifts)
+    </td>
+  </tr>
+</table>
