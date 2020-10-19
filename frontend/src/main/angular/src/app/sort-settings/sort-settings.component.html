@@ -1,5 +1,16 @@
-<select>
-  <option *ngFor="let field of fields" [value]="field.property">{{field.name}}</option>
+<select [(ngModel)]="selectedField">
+  <option *ngFor="let field of fields" [ngValue]="field">{{field.name}}</option>
 </select>
-ASC/DESC
-Add
+<button (click)="addSortParam(Order.ASC)">ASC</button>
+<button (click)="addSortParam(Order.DESC)">DESC</button>
+<table>
+  <tr *ngFor="let sortParam of selectedSortParams">
+    <td>
+      {{sortParam.field.name}}
+    </td>
+    <td>
+      {{sortParam.order}}
+    </td>
+  </tr>
+</table>
+<button (click)="clear()">Clear sort settings</button>

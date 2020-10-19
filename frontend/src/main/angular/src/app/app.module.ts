@@ -9,6 +9,7 @@ import { FlatTableComponent } from './flat-table/flat-table.component';
 import { MainPageComponent } from './main-page/main-page.component';
 import { SortSettingsComponent } from './sort-settings/sort-settings.component';
 import { FilterSettingsComponent } from './filter-settings/filter-settings.component';
+import {FormsModule} from "@angular/forms";
 
 @NgModule({
   declarations: [
@@ -18,12 +19,13 @@ import { FilterSettingsComponent } from './filter-settings/filter-settings.compo
     SortSettingsComponent,
     FilterSettingsComponent
   ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    NgbModule,
-    HttpClientModule
-  ],
+    imports: [
+        BrowserModule,
+        AppRoutingModule,
+        NgbModule,
+        HttpClientModule,
+        FormsModule
+    ],
   providers: [],
   bootstrap: [AppComponent]
 })

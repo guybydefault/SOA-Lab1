@@ -1,6 +1,6 @@
 import {Component, EventEmitter, OnInit, Output} from '@angular/core';
-import {SortParam} from "../domain/sort-param";
-import {fields} from "../domain/flat";
+import {Order, SortParam} from "../domain/sort-param";
+import {Field, FLAT_FIELDS} from "../domain/flat";
 
 @Component({
   selector: 'app-sort-settings',
@@ -11,15 +11,41 @@ export class SortSettingsComponent implements OnInit {
 
   @Output() sortUpdated = new EventEmitter<SortParam[]>();
 
-  private sortParams: SortParam[] = [];
+  selectedSortParams: SortParam[] = [];
 
-  fields = fields;
+  Order = Order;
+
+  fields: Field[];
+  selectedField: Field;
 
   constructor() {
   }
 
   ngOnInit(): void {
+    this.initFields()
+  }
+
+  addSortParam(order: Order) {
+    if (this.validate()) {
+      this.selectedSortParams.push(new SortParam(this.selectedField, order))
+      let ind = this.fields.indexOf(this.selectedField);
+      this.fields.splice(ind, 1);
+      this.sortUpdated.emit(this.selectedSortParams)
+    }
+  }
+
+  initFields() {
+    this.fields = Object.assign([], FLAT_FIELDS);
+  }
+
+  validate(): boolean {
+    //TODO
+    return true;
+  }
+
+  clear() {
+    this.initFields()
+    this.selectedSortParams = [];
   }
 
 }
-

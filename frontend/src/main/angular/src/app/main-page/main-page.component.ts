@@ -1,6 +1,8 @@
 import {Component, OnInit} from '@angular/core';
 import {Flat} from "../domain/flat";
 import {FlatService} from "../service/flat.service";
+import {FilterParam} from "../domain/filter-param";
+import {SortParam} from "../domain/sort-param";
 
 @Component({
   selector: 'app-main-page',
@@ -10,25 +12,30 @@ import {FlatService} from "../service/flat.service";
 export class MainPageComponent implements OnInit {
   flats: Flat[];
 
+  sortParams: SortParam[] = [];
+  filterParams: FilterParam[] = [];
+
   constructor(private flatService: FlatService) {
   }
 
   ngOnInit(): void {
-    this.reloadCities();
+    this.reloadFlats();
   }
 
-  reloadCities() {
-    this.flatService.findFlats(null, null, null).subscribe(res => {
+  reloadFlats() {
+    this.flatService.findFlats(null, this.sortParams, this.filterParams).subscribe(res => {
       this.flats = res.content;
     });
   }
 
-  sortUpdated(event) {
-
+  sortParamsUpdated(sortParams: SortParam[]) {
+    this.sortParams = sortParams;
+    this.reloadFlats();
   }
 
-  filterUpdated(event) {
-
+  filterParamsUpdated(filterParams: FilterParam[]) {
+    this.filterParams = filterParams;
+    this.reloadFlats();
   }
 
 }

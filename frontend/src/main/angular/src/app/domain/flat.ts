@@ -33,7 +33,7 @@ export class Field {
   }
 }
 
-export const fields = [
+export const FLAT_FIELDS = [
   new Field('id', 'Id'),
   new Field('name', 'Name'),
   new Field('creationDate', 'Creation date'),

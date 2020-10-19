@@ -1,6 +1,16 @@
-<select>
-  <option *ngFor="let field of fields" [value]="field.property">{{field.name}}</option>
+<select [(ngModel)]="selectedField">
+  <option *ngFor="let field of fields" [ngValue]="field">{{field.name}}</option>
 </select>
-<select>
-  <option *ngFor="let op of comparisonOperations" [value]="op.operation">{{op.name}}</option>
+<select [(ngModel)]="selectedOperation">
+  <option *ngFor="let op of comparisonOperations" [ngValue]="op">{{op.name}}</option>
 </select>
+<input [(ngModel)]="fieldValue" type="text"/>
+<button (click)="addFilter()">Add</button>
+<table>
+  <tr *ngFor="let filter of filters">
+    <td>{{filter.field.name}}</td>
+    <td>{{filter.operation.name.toLowerCase()}}</td>
+    <td>{{filter.value}}</td>
+  </tr>
+</table>
+<button (click)="clear()">Clear filter settings</button>
