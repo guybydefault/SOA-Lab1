@@ -24,9 +24,9 @@ export interface House {
   numberOfLifts: number;
 }
 
-export const furnishes = ['NONE', 'BAD', 'LITTLE'];
-export const views = ['PARK', 'NORMAL', 'GOOD'];
-export const transports = ['FEW, LITTLE, ENOUGH'];
+export const FURNISH_TYPES = ['NONE', 'BAD', 'LITTLE'];
+export const VIEW_TYPES = ['PARK', 'NORMAL', 'GOOD'];
+export const TRANSPORT_TYPES = ['FEW', 'LITTLE', 'ENOUGH'];
 
 export class Field {
   constructor(public property: string, public name: string) {

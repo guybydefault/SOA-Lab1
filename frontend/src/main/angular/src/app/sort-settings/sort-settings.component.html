@@ -1,9 +1,23 @@
-<select [(ngModel)]="selectedField">
-  <option *ngFor="let field of fields" [ngValue]="field">{{field.name}}</option>
-</select>
-<button (click)="addSortParam(Order.ASC)">ASC</button>
-<button (click)="addSortParam(Order.DESC)">DESC</button>
-<table>
+<h3>Sort</h3>
+<div class="form-group">
+  <label for="field-sort-select">
+    Field
+  </label>
+  <select class="form-control" id="field-sort-select" [(ngModel)]="selectedField">
+    <option *ngFor="let field of fields" [ngValue]="field">{{field.name}}</option>
+  </select>
+</div>
+<div class="btn-group">
+  <button class="btn btn-primary btn-sm" (click)="addSortParam(Order.ASC)">ASC</button>
+  <button class="btn btn-primary btn-sm" (click)="addSortParam(Order.DESC)">DESC</button>
+</div>
+<table *ngIf="selectedSortParams.length > 0" class="table table-striped">
+  <thead>
+  <tr>
+    <th scope="col">Field name</th>
+    <th scope="col">Sort order</th>
+  </tr>
+  </thead>
   <tr *ngFor="let sortParam of selectedSortParams">
     <td>
       {{sortParam.field.name}}
@@ -13,4 +27,6 @@
     </td>
   </tr>
 </table>
-<button (click)="clear()">Clear sort settings</button>
+<div>
+  <button class="btn btn-secondary btn-sm" (click)="clear()">Clear sort settings</button>
+</div>

@@ -1,18 +1,21 @@
-<table>
+<table class="table table-striped">
+  <thead>
   <tr>
-    <th>ID</th>
-    <th>Name</th>
-    <th>Creation date</th>
-    <th>Area</th>
-    <th>Number of rooms</th>
-    <th>Furnish</th>
-    <th>View</th>
-    <th>Transport</th>
-    <th>Coordinates</th>
-    <th>House info</th>
+    <th scope="col">ID</th>
+    <th scope="col">Name</th>
+    <th scope="col">Creation date</th>
+    <th scope="col">Area</th>
+    <th scope="col">Number of rooms</th>
+    <th scope="col">Furnish</th>
+    <th scope="col">View</th>
+    <th scope="col">Transport</th>
+    <th scope="col">Coordinates</th>
+    <th scope="col">House info</th>
+    <th scope="col">Actions</th>
   </tr>
+  </thead>
   <tr *ngFor="let flat of flats">
-    <td>{{flat.id}}</td>
+    <th scope="row">{{flat.id}}</th>
     <td>{{flat.name}}</td>
     <td>{{flat.creationDate | date:'medium'}}</td>
     <td>{{flat.area}}</td>
@@ -24,5 +27,9 @@
     <td>{{flat.house.name}} (built in {{flat.house.year}}, {{flat.house.numberOfFloors}}
       floors, {{flat.house.numberOfFlatsOnFloor}} flats on floor, {{flat.house.numberOfLifts}} lifts)
     </td>
+    <td>
+      <button type="button" class="btn btn-warning btn-sm" (click)="editFlat(flat)">Edit</button>
+      <button type="button" class="btn btn-danger btn-sm" (click)="deleteFlat(flat)">Delete</button>
+    <td>
   </tr>
 </table>

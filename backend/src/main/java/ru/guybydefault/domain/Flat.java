@@ -35,7 +35,6 @@ public class Flat {
     @Valid
     private Coordinates coordinates; //Поле не может быть null
 
-    @NotNull
     @CreationTimestamp
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)

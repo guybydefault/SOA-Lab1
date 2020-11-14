@@ -1,16 +1,46 @@
-<select [(ngModel)]="selectedField">
-  <option *ngFor="let field of fields" [ngValue]="field">{{field.name}}</option>
-</select>
-<select [(ngModel)]="selectedOperation">
-  <option *ngFor="let op of comparisonOperations" [ngValue]="op">{{op.name}}</option>
-</select>
-<input [(ngModel)]="fieldValue" type="text"/>
-<button (click)="addFilter()">Add</button>
-<table>
+<h3>Filter</h3>
+<div class="form-group">
+  <label for="field-select">
+    Field
+  </label>
+  <select id="field-select" class="form-control" [(ngModel)]="selectedField">
+    <option *ngFor="let field of fields" [ngValue]="field">{{field.name}}</option>
+  </select>
+</div>
+
+<div class="form-group">
+  <label for="operation-select">
+    Operation
+  </label>
+  <select id="operation-select" class="form-control" [(ngModel)]="selectedOperation">
+    <option *ngFor="let op of comparisonOperations" [ngValue]="op">{{op.name}}</option>
+  </select>
+</div>
+
+<div class="form-group">
+  <label for="val-input">
+    Value
+  </label>
+  <input id="val-input" class="form-control" [(ngModel)]="fieldValue" type="text"/>
+</div>
+<div>
+  <button type="button" class="btn btn-primary btn-sm" (click)="addFilter()">Add</button>
+</div>
+
+<table *ngIf="filters.length > 0" class="table table-striped">
+  <thead>
+  <tr>
+    <th scope="col">Field name</th>
+    <th scope="col">Operation</th>
+    <th scope="col">Value</th>
+  </tr>
+  </thead>
   <tr *ngFor="let filter of filters">
     <td>{{filter.field.name}}</td>
     <td>{{filter.operation.name.toLowerCase()}}</td>
     <td>{{filter.value}}</td>
   </tr>
 </table>
-<button (click)="clear()">Clear filter settings</button>
+<div>
+  <button type="button" class="btn btn-secondary btn-sm" (click)="clear()">Clear filter settings</button>
+</div>

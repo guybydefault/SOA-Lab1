@@ -1,11 +1,20 @@
-<div>
-  <app-sort-settings (sortUpdated)="sortParamsUpdated($event)">
-  </app-sort-settings>
+<div class="container">
+  <div>
+    <app-flat-form #flatForm (flatEdited)="flatEdited($event)"></app-flat-form>
+  </div>
+  <div class="row">
+    <div class="col">
+      <app-filter-settings (filterUpdated)="filterParamsUpdated($event)">
+      </app-filter-settings>
+    </div>
+    <div class="col">
+      <app-sort-settings (sortUpdated)="sortParamsUpdated($event)">
+      </app-sort-settings>
+    </div>
+  </div>
+  <div>
+    <app-page-request (pageRequestUpdated)="pageRequestUpdated($event)" [page]="page"></app-page-request>
+    <app-flat-table (flatDeleted)="flatDeleted($event)" [flatForm]=flatForm [flats]="flats"></app-flat-table>
+  </div>
 </div>
-<div>
-  <app-filter-settings (filterUpdated)="filterParamsUpdated($event)">
-  </app-filter-settings>
-</div>
-<div>
-  <app-flat-table [flats]="flats"></app-flat-table>
-</div>
+<app-toast aria-live="polite" aria-atomic="true"></app-toast>

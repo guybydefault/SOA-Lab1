@@ -1,6 +1,7 @@
 import {Component, EventEmitter, OnInit, Output} from '@angular/core';
 import {Order, SortParam} from "../domain/sort-param";
 import {Field, FLAT_FIELDS} from "../domain/flat";
+import {ToastService} from "../service/toast.service";
 
 @Component({
   selector: 'app-sort-settings',
@@ -18,7 +19,7 @@ export class SortSettingsComponent implements OnInit {
   fields: Field[];
   selectedField: Field;
 
-  constructor() {
+  constructor(private toastService: ToastService) {
   }
 
   ngOnInit(): void {
@@ -30,6 +31,7 @@ export class SortSettingsComponent implements OnInit {
       this.selectedSortParams.push(new SortParam(this.selectedField, order))
       let ind = this.fields.indexOf(this.selectedField);
       this.fields.splice(ind, 1);
+      this.selectedField = undefined;
       this.sortUpdated.emit(this.selectedSortParams)
     }
   }
@@ -39,13 +41,17 @@ export class SortSettingsComponent implements OnInit {
   }
 
   validate(): boolean {
-    //TODO
-    return true;
+    if(this.selectedField !== undefined) {
+      return true;
+    } else {
+      this.toastService.showError('Sort field has not been selected.')
+    }
   }
 
   clear() {
     this.initFields()
-    this.selectedSortParams = [];
+    this.selectedSortParams = []
+    this.sortUpdated.emit(this.selectedSortParams)
   }
 
 }
