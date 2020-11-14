@@ -196,7 +196,7 @@ public class FlatServlet extends HttpServlet {
 
     private Flat parseFlat(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
-            return objectMapper.readValue(req.getReader(), Flat.class);
+            return objectMapper.readValue(req.getInputStream(), Flat.class);
         } catch (JsonParseException | JsonMappingException e) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
             return null;
