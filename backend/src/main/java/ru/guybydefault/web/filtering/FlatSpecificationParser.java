@@ -26,7 +26,7 @@ public class FlatSpecificationParser {
                     .collect(Collectors.toList());
             return new FlatSpecification(searchCriteria);
         } catch (Exception e) {
-            return null;
+            throw new SpecificationParserException(e);
         }
     }
 }
