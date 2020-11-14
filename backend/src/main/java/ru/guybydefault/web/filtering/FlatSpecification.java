@@ -1,6 +1,5 @@
 package ru.guybydefault.web.filtering;
 
-import lombok.SneakyThrows;
 import org.springframework.data.jpa.domain.Specification;
 import ru.guybydefault.domain.Flat;
 import ru.guybydefault.domain.Furnish;
@@ -8,7 +7,6 @@ import ru.guybydefault.domain.Transport;
 import ru.guybydefault.domain.View;
 
 import javax.persistence.criteria.*;
-import javax.validation.ValidationException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -36,9 +34,9 @@ public class FlatSpecification implements Specification<Flat> {
         List<Predicate> predicates = new ArrayList<>();
 
         for (SearchCriteria criteria : searchCriteriaList) {
-            final Class<?> javaType = getPath(root, criteria.getKeyPath()).getJavaType();
-
             try {
+                final Class<?> javaType = getPath(root, criteria.getKeyPath()).getJavaType();
+
                 if (javaType.equals(Transport.class)) {
                     add(builder, predicates, criteria, getPath(root, criteria.getKeyPath()), Transport.valueOf(criteria.getValue()));
                 } else if (javaType.equals(Furnish.class)) {
@@ -50,7 +48,7 @@ public class FlatSpecification implements Specification<Flat> {
                 } else {
                     if (javaType.equals(Integer.class)) {
                         Integer.parseInt(criteria.getValue());
-                    } else if(javaType.equals(Double.class)) {
+                    } else if (javaType.equals(Double.class)) {
                         Double.parseDouble(criteria.getValue());
                     }
                     add(builder, predicates, criteria, getPath(root, criteria.getKeyPath()), criteria.getValue());
