@@ -1,0 +1,78 @@
+<form [formGroup]="formGroup" *ngIf="formGroup">
+  <h6>General</h6>
+  <div class="form-row">
+    <div class="form-group col">
+      <label for="name">Name:</label>
+      <input id="name" formControlName="name" type="text" name="name"/>
+    </div>
+    <div class="form-group col">
+      <label for="area">Area:</label>
+      <input id="area" formControlName="area" type="number" name="area"/>
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="numberOfRooms">Number of rooms:</label>
+    <input id="numberOfRooms" formControlName="numberOfRooms" type="number" name="numberOfRooms"/>
+  </div>
+  <div class="form-row">
+    <div class="form-group col">
+      <label for="furnish">Furnish:</label>
+      <select id="furnish" formControlName="furnish" name="furnish">
+        <option *ngFor="let furnishType of furnishTypes">{{furnishType}}</option>
+      </select>
+    </div>
+    <div class="form-group col">
+      <label for="view">View:</label>
+      <select id="view" formControlName="view" name="view">
+        <option *ngFor="let viewType of viewTypes">{{viewType}}</option>
+      </select>
+    </div>
+    <div class="form-group col">
+      <label for="transport">Transport:</label>
+      <select id="transport" formControlName="transport" name="transport">
+        <option *ngFor="let transportType of transportTypes">{{transportType}}</option>
+      </select>
+    </div>
+  </div>
+
+
+  <h6>Coordinates</h6>
+  <div class="form-group">
+    <label for="coordinates.x">Coordinates X:</label>
+    <input id="coordinates.x" formControlName="x" type="number" name="coordinates.x"/>
+  </div>
+  <div class="form-group">
+    <label for="coordinates.y">Coordinates Y:</label>
+    <input id="coordinates.y" formControlName="y" type="number" name="coordinates.y"/>
+  </div>
+
+  <h6>House</h6>
+  <div class="form-group">
+    <label for="house.name">Name:</label>
+    <input id="house.name" formControlName="houseName" type="text" name="house.name"/>
+  </div>
+  <div class="form-group">
+    <label for="house.year">Year:</label>
+    <input id="house.year" formControlName="houseYear" type="number" name="house.year"/>
+  </div>
+
+  <div class="form-group">
+    <label for="house.numberOfFloors">Number of floors:</label>
+    <input id="house.numberOfFloors" formControlName="houseNumberOfFloors" type="number" name="house.numberOfFloors"/>
+  </div>
+  <div class="form-group">
+    <label for="house.numberOfFlatsOnFloor">Number of flats on floor:</label>
+    <input id="house.numberOfFlatsOnFloor" formControlName="houseFlatsOnFloor" type="number"
+           name="house.numberOfFlatsOnFloor"/>
+  </div>
+  <div class="form-group">
+    <label for="house.numberOfLifts">Number of lifts:</label>
+    <input id="house.numberOfLifts" formControlName="houseLifts" type="number" name="house.numberOfLifts"/>
+  </div>
+  <div class="btn-group">
+    <button *ngIf="this.flatId !== 0" class="btn btn-sm" type="submit" [class.btn-primary]="this.formGroup.valid" [class.btn-secondary]="!this.formGroup.valid" [disabled]="!this.formGroup.valid" (click)="submitEdit()">Submit edit
+    </button>
+    <button class="btn btn-sm" type="submit" [class.btn-primary]="this.formGroup.valid" [class.btn-secondary]="!this.formGroup.valid" [disabled]="!this.formGroup.valid" (click)="submitNew()">Create new
+    </button>
+  </div>
+</form>

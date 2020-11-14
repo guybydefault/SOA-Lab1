@@ -1,0 +1,19 @@
+<nav class="navbar" aria-label="Page navigation">
+  <ul class="pagination mr-auto">
+    <li class="page-item" [class.disabled]="page.number == 0">
+      <a class="page-link" (click)="setPage(page.number - 1)" tabindex="-1">Previous</a>
+    </li>
+    <li *ngFor="let item of [].constructor(page.totalPages); let i = index" class="page-item"
+        [class.active]="page.number == i">
+      <a class="page-link" (click)="setPage(i)">{{i + 1}}</a>
+    </li>
+    <li class="page-item" [class.disabled]="page.number > (page.totalPages - 2)">
+      <a class="page-link" (click)="setPage(page.number + 1)">Next</a>
+    </li>
+  </ul>
+  <ul class="pagination ml-auto">
+    <li class="page-item" *ngFor="let currPageSize of [5, 10, 20]" [class.active]="pageSize === currPageSize">
+      <a class="page-link" (click)="setPageSize(currPageSize)">{{currPageSize}}</a>
+    </li>
+  </ul>
+</nav>
