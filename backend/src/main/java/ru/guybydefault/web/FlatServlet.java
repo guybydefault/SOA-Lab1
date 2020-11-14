@@ -16,6 +16,7 @@ import ru.guybydefault.domain.Transport;
 import ru.guybydefault.repository.FlatRepository;
 import ru.guybydefault.web.filtering.FlatSpecification;
 import ru.guybydefault.web.filtering.FlatSpecificationParser;
+import ru.guybydefault.web.filtering.SortParseOrderException;
 import ru.guybydefault.web.filtering.SpecificationParserException;
 
 import javax.servlet.ServletConfig;
@@ -142,6 +143,8 @@ public class FlatServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Filter parameters parsing failed");
         } catch (PropertyReferenceException e) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Sort parameters are not correct");
+        } catch (SortParseOrderException e) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Sort order is not correct");
         }
     }
 
@@ -255,12 +258,15 @@ public class FlatServlet extends HttpServlet {
             return Sort.unsorted();
         }
 
-        List<Sort.Order> orders = Arrays.stream(values)
-                .map(x -> x.split(","))
-                .map(x -> new Sort.Order(Sort.Direction.fromString(x[1]), x[0]))
-                .collect(Collectors.toList());
-
-        return Sort.by(orders);
+        try {
+            List<Sort.Order> orders = Arrays.stream(values)
+                    .map(x -> x.split(","))
+                    .map(x -> new Sort.Order(Sort.Direction.fromString(x[1]), x[0]))
+                    .collect(Collectors.toList());
+            return Sort.by(orders);
+        } catch (IllegalArgumentException e) {
+            throw new SortParseOrderException(e);
+        }
     }
 
     private List<List<String>> getCriteria(String[] values) {
