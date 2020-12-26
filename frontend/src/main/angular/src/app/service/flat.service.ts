@@ -2,12 +2,13 @@ import {Injectable} from '@angular/core';
 import {HttpClient, HttpParams} from "@angular/common/http";
 import {Flat} from "../domain/flat";
 import {PageableDto} from "../domain/pageInfo";
-import {SortParam} from "../domain/sort-param";
+import {Order, SortParam} from "../domain/sort-param";
 import {FilterParam} from "../domain/filter-param";
 import {PageRequest} from "../domain/page-request";
 
 
-const baseUrl = 'http://localhost:10241/Lab1_Server/api/flats';
+const baseUrl = 'https://localhost:10241/Lab1_Server/api/flats';
+const agencyUrl = 'https://localhost:10243/lab2-0.0.1-SNAPSHOT/agency'
 
 @Injectable({
   providedIn: 'root'
@@ -34,6 +35,16 @@ export class FlatService {
     params = params.append('size', pageRequest.size.toString())
 
     return this.http.get<PageableDto<Flat>>(`${baseUrl}`, {params});
+  }
+
+  findCheapest(f1 : Flat, f2 : Flat) {
+      let url = agencyUrl + '/get-cheapest/' + f1.id + '/' + f2.id;
+      return this.http.get<Flat>(`${url}`);
+  }
+
+  getOrderedByTimeToMetro(type: string, sortOrder: Order) {
+    let url = agencyUrl + '/get-ordered-by-time-to-metro/' + type + '/' + sortOrder.toString();
+    return this.http.get<Flat[]>(`${url}`);
   }
 
   deleteFlat(id: number) {

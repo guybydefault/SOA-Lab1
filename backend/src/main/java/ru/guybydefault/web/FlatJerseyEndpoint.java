@@ -3,14 +3,11 @@ package ru.guybydefault.web;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
 import ru.guybydefault.domain.Flat;
 import ru.guybydefault.domain.Transport;
 import ru.guybydefault.repository.FlatRepository;
@@ -19,17 +16,16 @@ import ru.guybydefault.web.filtering.FlatSpecificationParser;
 import ru.guybydefault.web.filtering.SortParseOrderException;
 import ru.guybydefault.web.filtering.SpecificationParserException;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.transaction.Transactional;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -37,65 +33,88 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-@WebServlet(name = "FlatServlet", urlPatterns = "/api-servlet/flats/*")
+@Path("/flats")
 @Component
-public class FlatServlet extends HttpServlet {
+public class FlatJerseyEndpoint {
 
+    private static final String ENDPOINT_PATH = "/flats";
+
+    @Context
+    HttpServletRequest req;
+    @Context
+    HttpServletResponse resp;
     private FlatRepository flatRepository;
-
     private ObjectMapper objectMapper = new ObjectMapper();
-
-    public FlatServlet() {
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        objectMapper.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
 
     @Autowired
     public void setFlatRepository(FlatRepository flatRepository) {
         this.flatRepository = flatRepository;
     }
 
-    @Override
-    public void init(ServletConfig config) throws ServletException {
-        super.init(config);
-        WebApplicationContext springContext = WebApplicationContextUtils.getRequiredWebApplicationContext(config.getServletContext());
-        springContext.getAutowireCapableBeanFactory().autowireBean(this);
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response doGet() throws IOException {
+        return findAll(req, resp);
     }
 
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        Flat flat = parseFlat(request, response);
-        if (flat == null || !validate(flat, response)) {
+    @GET
+    @Path("{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response findById(@PathParam("id") Integer id) throws IOException {
+        if (id == null) {
+            return Response.status(Response.Status.BAD_REQUEST.getStatusCode(), "Id is not correct").build();
+        }
+        return findOne(id);
+    }
+
+
+    @GET
+    @Path("/number-of-rooms/average")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response numberOfRoomsAverage() throws IOException {
+        return buildOkResponse(flatRepository.getAverageNumberOfRooms());
+    }
+
+    @GET
+    @Path("/transport/max")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response anyFlatWithMaxTransport() throws IOException {
+        return buildOkResponse(flatRepository.findAnyFlatWithMaxTransport());
+    }
+
+    @GET
+    @Path("/transport/greater-than")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response transportGreaterThan() throws IOException {
+        return findFlatsTransportGreaterThan(req);
+    }
+
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public void doPost() throws IOException {
+        Flat flat = parseFlat(req, resp);
+        if (flat == null || !validate(flat, resp)) {
             return;
         } else if (flat.getId() != 0) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Id should not be sent in POST request");
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Id should not be sent in POST request");
             return;
         }
 
         flat = flatRepository.save(flat);
-        response.setStatus(HttpServletResponse.SC_CREATED);
-        response.setHeader("Location", flat.getId() + "/");
-        response.setContentType("application/json");
-        objectMapper.writeValue(response.getWriter(), flat);
+        resp.setStatus(HttpServletResponse.SC_CREATED);
+        resp.setHeader("Location", flat.getId() + "/");
+        resp.setContentType("application/json");
+        objectMapper.writeValue(resp.getWriter(), flat);
     }
 
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String relativeServletPath = getRelativeServletPath(req);
-        if (relativeServletPath.trim().isEmpty() || relativeServletPath.trim().equals("/")) {
-            findAll(req, resp);
-        } else if (relativeServletPath.equals("/number-of-rooms/average")) {
-            returnOK(flatRepository.getAverageNumberOfRooms(), resp);
-        } else if (relativeServletPath.equals("/transport/max")) {
-            returnOK(flatRepository.findAnyFlatWithMaxTransport(), resp);
-        } else if (relativeServletPath.equals("/transport/greater-than")) {
-            findFlatsTransportGreaterThan(req, resp);
-        } else {
-            findOne(req, resp);
-        }
-    }
 
-    @Override
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        Integer id = getIntPathVariable("/{id}", getRelativeServletPath(req)).orElse(null);
+    @PUT
+    @Path("{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public void doPut(@PathParam("id") Integer id) throws IOException {
         if (id == null) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Correct id has not been provided.");
             return;
@@ -116,9 +135,10 @@ public class FlatServlet extends HttpServlet {
         returnOK(flat, resp);
     }
 
-    @Override
-    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        Integer id = getIntPathVariable("/{id}", getRelativeServletPath(req)).orElse(null);
+    @DELETE
+    @Path("{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public void doDelete(@PathParam("id") Integer id) throws IOException {
         if (id == null) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Correct id has not been provided.");
             return;
@@ -132,48 +152,58 @@ public class FlatServlet extends HttpServlet {
         returnOK(resp);
     }
 
-    private void findAll(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    private void returnOK(HttpServletResponse resp) throws IOException {
+        returnOK(null, resp);
+    }
+
+    private void returnOK(Object responseEntity, HttpServletResponse resp) throws IOException {
+        if (responseEntity == null) {
+            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+            return;
+        }
+        resp.setStatus(HttpServletResponse.SC_OK);
+        resp.setContentType("application/json");
+        objectMapper.writeValue(resp.getWriter(), responseEntity);
+    }
+
+    private Response findAll(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             String[] criteriaValues = req.getParameterValues("filter");
             FlatSpecification flatSpecification = FlatSpecificationParser.parse(getCriteria(criteriaValues));
-            PageRequest pageRequest = parsePageRequest(req);
-            returnOK(flatRepository.findAll(flatSpecification, pageRequest), resp);
+            if (!req.getParameterMap().containsKey("size") && !req.getParameterMap().containsKey("page")) {
+                return buildOkResponse(flatRepository.findAll(flatSpecification));
+            } else {
+                PageRequest pageRequest = parsePageRequest(req);
+                return buildOkResponse(flatRepository.findAll(flatSpecification, pageRequest));
+            }
         } catch (SpecificationParserException e) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Filter parameters parsing failed");
+            return Response.status(HttpServletResponse.SC_BAD_REQUEST, "Filter parameters parsing failed").build();
         } catch (PropertyReferenceException e) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Sort parameters are not correct");
+            return Response.status(HttpServletResponse.SC_BAD_REQUEST, "Sort parameters are not correct").build();
         } catch (SortParseOrderException e) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Sort order is not correct");
+            return Response.status(HttpServletResponse.SC_BAD_REQUEST, "Sort order is not correct").build();
         }
     }
 
-    private void findOne(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        Integer id = getIntPathVariable("/{id}", getRelativeServletPath(req)).orElse(null);
-        if (id == null) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-            return;
-        }
-
+    private Response findOne(Integer id) throws IOException {
         Flat flat = flatRepository.findById(id).orElse(null);
         if (flat == null) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-            return;
+            return Response.status(Response.Status.NOT_FOUND.getStatusCode(), "FLat by given id not found").build();
         }
 
-        returnOK(flat, resp);
+        return buildOkResponse(flat);
     }
 
-    private void findFlatsTransportGreaterThan(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    private Response findFlatsTransportGreaterThan(HttpServletRequest req) throws IOException {
         try {
             String transportParam = req.getParameter("value");
             if (transportParam == null) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Value not provided.");
-                return;
+                return Response.status(HttpServletResponse.SC_BAD_REQUEST, "Value not provided.").build();
             }
             long count = flatRepository.countByTransportGreaterThan(Transport.valueOf(transportParam));
-            returnOK(count, resp);
+            return buildOkResponse(count);
         } catch (IllegalArgumentException e) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Transport value is unknown. Available values: " + Arrays.toString(Transport.values()));
+            return Response.status(HttpServletResponse.SC_BAD_REQUEST, "Transport value is unknown. Available values: " + Arrays.toString(Transport.values())).build();
         }
     }
 
@@ -215,7 +245,7 @@ public class FlatServlet extends HttpServlet {
     }
 
     private String getRelativeServletPath(HttpServletRequest request) {
-        String contextServletPath = request.getServletPath() + request.getContextPath();
+        String contextServletPath = request.getServletPath() + request.getContextPath() + ENDPOINT_PATH;
         return request.getRequestURI().substring(contextServletPath.length());
     }
 
@@ -238,18 +268,16 @@ public class FlatServlet extends HttpServlet {
         }
     }
 
-    private void returnOK(HttpServletResponse resp) throws IOException {
-        returnOK(null, resp);
+    private Response buildBadRequestResponse(String message) {
+        return Response.status(Response.Status.BAD_REQUEST.getStatusCode(), message).build();
     }
 
-    private void returnOK(Object responseEntity, HttpServletResponse resp) throws IOException {
+    private Response buildOkResponse(Object responseEntity) throws IOException {
         if (responseEntity == null) {
-            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
-            return;
+            return Response.noContent().build();
         }
-        resp.setStatus(HttpServletResponse.SC_OK);
-        resp.setContentType("application/json");
-        objectMapper.writeValue(resp.getWriter(), responseEntity);
+        //TODO ContentType application/json? do we need to set?
+        return Response.ok().entity(responseEntity).build();
     }
 
     private Sort parseSort(String[] values) {
@@ -277,5 +305,6 @@ public class FlatServlet extends HttpServlet {
                 .map(x -> Arrays.stream(x.split(",")).collect(Collectors.toList()))
                 .collect(Collectors.toList());
     }
+
 
 }

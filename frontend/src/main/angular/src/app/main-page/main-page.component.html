@@ -13,7 +13,10 @@
     </div>
   </div>
   <div>
-    <app-page-request (pageRequestUpdated)="pageRequestUpdated($event)" [page]="page"></app-page-request>
+    <app-distance-order (distanceOrderUpdated)="distanceOrderUpdated($event)"></app-distance-order>
+  </div>
+  <div>
+    <app-page-request *ngIf="showPagination()" (pageRequestUpdated)="pageRequestUpdated($event)" [page]="page"></app-page-request>
     <app-flat-table (flatDeleted)="flatDeleted($event)" [flatForm]=flatForm [flats]="flats"></app-flat-table>
   </div>
 </div>

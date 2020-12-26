@@ -14,7 +14,7 @@
     <th scope="col">Actions</th>
   </tr>
   </thead>
-  <tr *ngFor="let flat of flats">
+  <tr *ngFor="let flat of flats" [class.table-active]="isFlatInCompare(flat)" [class.table-success]="isFlatWinnerOfComparison(flat)">
     <th scope="row">{{flat.id}}</th>
     <td>{{flat.name}}</td>
     <td>{{flat.creationDate | date:'medium'}}</td>
@@ -30,6 +30,7 @@
     <td>
       <button type="button" class="btn btn-warning btn-sm" (click)="editFlat(flat)">Edit</button>
       <button type="button" class="btn btn-danger btn-sm" (click)="deleteFlat(flat)">Delete</button>
+      <button type="button" class="btn btn-info btn-sm" (click)="compareFlat(flat)">Compare</button>
     <td>
   </tr>
 </table>

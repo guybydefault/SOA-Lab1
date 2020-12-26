@@ -1,0 +1,20 @@
+<h3>Ordered by time to metro</h3>
+While using this feature pagination is off (not supported).
+
+<div class="form-group">
+  <label for="field-sort-select">
+    Way of transport
+  </label>
+  <select class="form-control" id="field-sort-select" [(ngModel)]="selectedWayOfTransport">
+    <option *ngFor="let field of fields" [ngValue]="field">{{field.toString()}}</option>
+  </select>
+</div>
+
+<div class="btn-group">
+  <button class="btn btn-primary btn-sm" (click)="setDistanceOrderParam(Order.ASC)">ASC</button>
+  <button class="btn btn-primary btn-sm" (click)="setDistanceOrderParam(Order.DESC)">DESC</button>
+</div>
+
+<div>
+  <button type="button" class="btn btn-secondary btn-sm" (click)="clear()">Clear sort order settings</button>
+</div>

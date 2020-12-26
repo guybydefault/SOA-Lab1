@@ -7,6 +7,7 @@ import {PageRequest} from "../domain/page-request";
 import {FlatFormComponent} from "../flat-form/flat-form.component";
 import {PageableDto} from "../domain/pageInfo";
 import {ToastService} from "../service/toast.service";
+import {SortDistanceParam} from "../domain/sort-distance-param";
 
 @Component({
   selector: 'app-main-page',
@@ -22,6 +23,7 @@ export class MainPageComponent implements OnInit {
 
   sortParams: SortParam[] = [];
   filterParams: FilterParam[] = [];
+  sortDistanceParam: SortDistanceParam = undefined;
   pageRequest: PageRequest = new PageRequest(0, 20)
 
   constructor(private flatService: FlatService, private toastService: ToastService) {
@@ -31,7 +33,28 @@ export class MainPageComponent implements OnInit {
     this.reloadFlats();
   }
 
+  reloadFlatsOrderedByDistance() {
+    this.flatService.getOrderedByTimeToMetro(this.sortDistanceParam.wayOfTransport, this.sortDistanceParam.order).subscribe(res => {
+      this.flats = res;
+      this.toastService.showSuccess(`Flats has been successfully loaded!`)
+    }, error => {
+      this.toastService.showError(`Server returned error (${error.status}: ${error.statusText})`);
+    });
+  }
+
+  showPagination() : boolean {
+    return this.sortDistanceParam == undefined;
+  }
+
   reloadFlats() {
+    if (this.showPagination()) {
+      this.reloadFlatsWithPagination();
+    } else {
+      this.reloadFlatsOrderedByDistance();
+    }
+  }
+
+  reloadFlatsWithPagination() {
     this.flatService.findFlats(this.pageRequest, this.sortParams, this.filterParams).subscribe(res => {
       this.flats = res.content;
       this.page = res;
@@ -41,13 +64,24 @@ export class MainPageComponent implements OnInit {
     });
   }
 
+  private turnPaginationOn() {
+    this.sortDistanceParam = undefined;
+  }
+
   sortParamsUpdated(sortParams: SortParam[]) {
     this.sortParams = sortParams;
+    this.turnPaginationOn();
     this.reloadFlats();
   }
 
   filterParamsUpdated(filterParams: FilterParam[]) {
     this.filterParams = filterParams;
+    this.turnPaginationOn();
+    this.reloadFlats();
+  }
+
+  distanceOrderUpdated(sortDistanceParam: SortDistanceParam) {
+    this.sortDistanceParam = sortDistanceParam;
     this.reloadFlats();
   }
 

@@ -13,6 +13,7 @@ import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {FlatFormComponent} from './flat-form/flat-form.component';
 import { PageRequestComponent } from './page-request/page-request.component';
 import { ToastComponent } from './toast/toast.component';
+import { DistanceOrderComponent } from './distance-order/distance-order.component';
 
 @NgModule({
   declarations: [
@@ -23,7 +24,8 @@ import { ToastComponent } from './toast/toast.component';
     FilterSettingsComponent,
     FlatFormComponent,
     PageRequestComponent,
-    ToastComponent
+    ToastComponent,
+    DistanceOrderComponent
   ],
   imports: [
     BrowserModule,

@@ -13,30 +13,30 @@ import java.io.IOException;
 
 @Configuration
 public class WebConfiguration implements WebMvcConfigurer {
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/**")
-                .addResourceLocations("classpath:/resources/static/")
-                .resourceChain(true)
-                .addResolver(new PathResourceResolver() {
-                    @Override
-                    protected Resource getResource(String resourcePath, Resource location) throws IOException {
-                        Resource requestedResource = location.createRelative(resourcePath);
+//    @Override
+//    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+//        registry.addResourceHandler("/**")
+//                .addResourceLocations("classpath:/resources/static/")
+//                .resourceChain(true)
+//                .addResolver(new PathResourceResolver() {
+//                    @Override
+//                    protected Resource getResource(String resourcePath, Resource location) throws IOException {
+//                        Resource requestedResource = location.createRelative(resourcePath);
+//
+//                        return requestedResource.exists() && requestedResource.isReadable()
+//                                ? requestedResource
+//                                : new ClassPathResource("/resources/static/index.html");
+//                    }
+//                });
+//    }
 
-                        return requestedResource.exists() && requestedResource.isReadable()
-                                ? requestedResource
-                                : new ClassPathResource("/resources/static/index.html");
-                    }
-                });
-    }
-
-    @Override
-    public void addViewControllers(ViewControllerRegistry registry) {
-        registry.addViewController("/")
-                .setViewName("forward:/index.html");
-        registry.addViewController("")
-                .setViewName("forward:/index.html");
-    }
+//    @Override
+//    public void addViewControllers(ViewControllerRegistry registry) {
+//        registry.addViewController("/")
+//                .setViewName("forward:/index.html");
+//        registry.addViewController("")
+//                .setViewName("forward:/index.html");
+//    }
 
 //    @Override
 //    public void addCorsMappings(CorsRegistry registry) {
