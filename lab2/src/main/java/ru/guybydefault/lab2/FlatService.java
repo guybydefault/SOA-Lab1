@@ -3,6 +3,7 @@ package ru.guybydefault.lab2;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -23,7 +24,8 @@ import java.util.stream.Collectors;
 @Service
 public class FlatService {
 
-    private static final String SERVICE_URL = "https://localhost:10241/Lab1_Server/api/flats";
+    @Value("${api.url}")
+    private String SERVICE_URL;
     private RestTemplate restTemplate = new RestTemplate();
     private RestTemplateBuilder builder = new RestTemplateBuilder();
     private ObjectMapper objectMapper = new ObjectMapper();
