@@ -1,5 +1,3 @@
-package ru.guybydefault.repository;
-
 import ru.guybydefault.domain.Flat;
 import ru.guybydefault.domain.Transport;
 import ru.guybydefault.web.PageRequest;

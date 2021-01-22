@@ -1,25 +1,25 @@
 package ru.guybydefault.web.filtering;
 
-import org.springframework.data.jpa.domain.Specification;
 import ru.guybydefault.domain.Flat;
 import ru.guybydefault.domain.Furnish;
 import ru.guybydefault.domain.Transport;
 import ru.guybydefault.domain.View;
 
 import javax.persistence.criteria.*;
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FlatSpecification implements Specification<Flat> {
+public class FlatSpecification implements Serializable {
     List<SearchCriteria> searchCriteriaList;
 
     public FlatSpecification(List<SearchCriteria> searchCriteriaList) {
         this.searchCriteriaList = searchCriteriaList;
     }
 
-    private static <T> Path<T> getPath(Root<Flat> root, String[] key) {
+    public static <T> Path<T> getPath(Root<Flat> root, String[] key) {
         Path<Object> path = root.get(key[0]);
 
         for (int i = 1; i < key.length; i++) {
@@ -29,8 +29,7 @@ public class FlatSpecification implements Specification<Flat> {
         return (Path<T>) path;
     }
 
-    @Override
-    public Predicate toPredicate(Root<Flat> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
+    public Predicate toPredicate(Root<Flat> root, CriteriaQuery<?> _query, CriteriaBuilder builder) {
         List<Predicate> predicates = new ArrayList<>();
 
         for (SearchCriteria criteria : searchCriteriaList) {

@@ -7,7 +7,7 @@ import {FilterParam} from "../domain/filter-param";
 import {PageRequest} from "../domain/page-request";
 
 
-const baseUrl = 'https://localhost:10241/Lab1_Server/api/flats';
+const baseUrl = 'http://localhost:10241/Lab1_Server/api/flats';
 const agencyUrl = 'https://localhost:10243/lab2-0.0.1-SNAPSHOT/agency'
 
 @Injectable({
