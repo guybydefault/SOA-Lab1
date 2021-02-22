@@ -31,14 +31,12 @@ public class FlatRepository implements RemoteFlatRepositoryInterface {
     public FlatRepository() {
     }
 
-    //    @Query("SELECT AVG(f.numberOfRooms) from Flat f")
     public long getAverageNumberOfRooms() {
-        return entityManager.createNativeQuery("SELECT AVG(f.numberOfRooms) from Flat f").getFirstResult();
+        return (Long) entityManager.createQuery("SELECT AVG(f.numberOfRooms) from Flat f").getSingleResult();
     }
 
     public FlatDto findAnyFlatWithMaxTransport() {
-        return (FlatDto) entityManager.createNativeQuery("SELECT * from Flat f where f.transport = (SELECT MAX(fi.transport) FROM Flat fi) LIMIT 1").getSingleResult();
-
+        return convert((Flat) entityManager.createQuery("SELECT f from Flat f where f.transport = (SELECT MAX(fi.transport) FROM Flat fi)").getSingleResult());
     }
 
     public long countByTransportGreaterThan(Transport transport) {
