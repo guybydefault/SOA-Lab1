@@ -10,7 +10,7 @@
     </parent>
 
     <groupId>ru.guybydefault</groupId>
-    <artifactId>Lab1_Server</artifactId>
+    <artifactId>Lab3</artifactId>
     <version>1.0</version>
     <packaging>pom</packaging>
 
@@ -20,7 +20,11 @@
 
     <modules>
         <module>frontend</module>
-        <module>backend</module>
-        <module>ejb</module>
+        <module>common</module>
+        <module>eureka</module>
+        <module>service1web</module>
+        <module>service1ejb</module>
+        <module>service2gateway</module>
+        <module>service2web</module>
     </modules>
 </project>
