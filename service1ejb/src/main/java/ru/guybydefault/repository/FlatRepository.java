@@ -32,7 +32,7 @@ public class FlatRepository implements RemoteFlatRepositoryInterface {
     }
 
     public long getAverageNumberOfRooms() {
-        return (Long) entityManager.createQuery("SELECT AVG(f.numberOfRooms) from Flat f").getSingleResult();
+        return ((Double) entityManager.createQuery("SELECT AVG(f.numberOfRooms) from Flat f").getSingleResult()).longValue();
     }
 
     public FlatDto findAnyFlatWithMaxTransport() {
