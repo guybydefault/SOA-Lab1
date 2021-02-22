@@ -39,7 +39,6 @@ public class FlatService {
     private RestTemplate restTemplate;
 
     private ObjectMapper objectMapper = new ObjectMapper();
-    private RestTemplateBuilder builder = new RestTemplateBuilder();
 
     FlatService() {
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -96,7 +95,7 @@ public class FlatService {
     }
 
     public Flat[] getFlats() {
-        ResponseEntity<Flat[]> responseEntity = builder.build().getForEntity(SERVICE_URL, Flat[].class);
+        ResponseEntity<Flat[]> responseEntity =restTemplate.getForEntity(SERVICE_URL, Flat[].class);
         return responseEntity.getBody();
     }
 

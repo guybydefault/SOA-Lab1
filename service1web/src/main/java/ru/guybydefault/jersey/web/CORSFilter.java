@@ -24,9 +24,9 @@ public class CORSFilter implements ContainerRequestFilter, ContainerResponseFilt
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
         // if there is no Origin header, then it is not a
         // cross origin request. We don't do anything.
-        if (requestContext.getHeaderString("Origin") == null) {
-            return;
-        }
+//        if (requestContext.getHeaderString("Origin") == null) {
+//            return;
+//        }
 
         if (isPreflightRequest(requestContext)) {
             responseContext.getHeaders().add("Access-Control-Allow-Credentials", "true");
@@ -35,7 +35,7 @@ public class CORSFilter implements ContainerRequestFilter, ContainerResponseFilt
             responseContext.getHeaders().add("Access-Control-Allow-Headers", "*");
             responseContext.getHeaders().add("X-Frame-Options", "ALLOW-FROM http://localhost:4200");
         }
-        // Cross origin requests can be either simple requests
+//         Cross origin requests can be either simple requests
         // or preflight request. We need to add this header
         // to both type of requests. Only preflight requests
         // need the previously added headers.

@@ -33,20 +33,21 @@ public class FlatRepository implements RemoteFlatRepositoryInterface {
 
     //    @Query("SELECT AVG(f.numberOfRooms) from Flat f")
     public long getAverageNumberOfRooms() {
-        //TODO
-        return 0;
+        return entityManager.createNativeQuery("SELECT AVG(f.numberOfRooms) from Flat f").getFirstResult();
     }
 
-    //    @Query(nativeQuery = true, value = "SELECT * from Flat f where f.transport = (SELECT MAX(fi.transport) FROM Flat fi) LIMIT 1")
     public FlatDto findAnyFlatWithMaxTransport() {
-        //TODO
-        FlatDto flatDto = new FlatDto();
-        return null;
+        return (FlatDto) entityManager.createNativeQuery("SELECT * from Flat f where f.transport = (SELECT MAX(fi.transport) FROM Flat fi) LIMIT 1").getSingleResult();
+
     }
 
     public long countByTransportGreaterThan(Transport transport) {
-        //TODO
-        return 0;
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Long> query = criteriaBuilder.createQuery(Long.class);
+        Root<Flat> root = query.from(Flat.class);
+
+        query = query.select(criteriaBuilder.count(root)).where(criteriaBuilder.lessThanOrEqualTo(root.get("transport"), transport));
+        return entityManager.createQuery(query).getSingleResult();
     }
 
     public FlatDto save(FlatDto flatDto) {
