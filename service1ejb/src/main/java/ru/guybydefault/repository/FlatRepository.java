@@ -36,7 +36,12 @@ public class FlatRepository implements RemoteFlatRepositoryInterface {
     }
 
     public FlatDto findAnyFlatWithMaxTransport() {
-        return convert((Flat) entityManager.createQuery("SELECT f from Flat f where f.transport = (SELECT MAX(fi.transport) FROM Flat fi)").getSingleResult());
+        List<Flat> flatList = (List<Flat>) entityManager.createQuery("SELECT f from Flat f where f.transport = (SELECT MAX(fi.transport) FROM Flat fi)").getResultList();
+        if (flatList.size() > 0) {
+            return convert(flatList.get(0));
+        } else {
+            return null;
+        }
     }
 
     public long countByTransportGreaterThan(Transport transport) {
