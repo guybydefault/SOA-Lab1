@@ -15,7 +15,6 @@
             <!--                      value="jdbc:postgresql://localhost:5432/postgres_studs"/> &lt;!&ndash; BD Mane &ndash;&gt;-->
             <!--            <property name="javax.persistence.jdbc.user" value="postgres_studs"/> &lt;!&ndash; DB User &ndash;&gt;-->
             <!--            <property name="javax.persistence.jdbc.password" value="postgres_studs"/> &lt;!&ndash; DB Password &ndash;&gt;-->
-
             <property name="hibernate.hbm2ddl.auto" value="update"/> <!-- create / create-drop / update -->
             <property name="hibernate.transaction.jta.platform"
                       value="org.hibernate.service.jta.platform.internal.SunOneJtaPlatform"/>
