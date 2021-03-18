@@ -8,7 +8,7 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 public class Pageable<T> implements Serializable {
-    private Iterable<T> content;
+    private T[] content;
     private long number;
     private long numberOfElements;
     private long size;

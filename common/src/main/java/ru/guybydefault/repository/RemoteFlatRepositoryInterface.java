@@ -23,7 +23,7 @@ public interface RemoteFlatRepositoryInterface {
 
     public boolean delete(Integer flatId);
 
-    public Iterable<FlatDto> findAll(FlatSpecification spec);
+    public FlatDto[] findAll(FlatSpecification spec);
 
     public Pageable<FlatDto> findAll(FlatSpecification spec, PageRequest pageRequest);
 }

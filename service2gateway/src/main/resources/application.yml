@@ -1,0 +1,40 @@
+server:
+  port: 10250
+  ssl:
+    key-store-type: JKS
+    key-store: classpath:keystore/minin.jks
+    key-store-password: changeit
+    trust-store-type: JKS
+    trust-store: classpath:keystore/minin.jks
+    trust-store-password: changeit
+    key-alias: minin
+    enabled: true
+spring:
+  application:
+    name: zuul
+eureka:
+  client:
+    registerWithEureka: false
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: ${EUREKA_URI:http://localhost:10251/eureka}
+    registry-fetch-interval-seconds: 5
+    initial-instance-info-replication-interval-seconds: 1
+    eureka-service-url-poll-interval-seconds: 10
+ribbon:
+  eureka:
+    enabled: true
+zuul:
+  routes:
+    agency:
+      path: /agency/**
+      serviceId: agency
+    main:
+      path: /main/**
+      serviceId: main
+  host:
+    connect-timeout-millis: 30000
+#  ignored-headers: Access-Control-Allow-Credentials, Access-Control-Allow-Origin, Access-Control-Allow-Methods
+  sslHostnameValidationEnabled: false
+  ignored-services: '*'
+  set-content-length: true

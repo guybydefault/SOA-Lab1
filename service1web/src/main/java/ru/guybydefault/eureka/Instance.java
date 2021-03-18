@@ -1,4 +1,4 @@
-package ru.guybydefault.jersey.eureka;
+package ru.guybydefault.eureka;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;

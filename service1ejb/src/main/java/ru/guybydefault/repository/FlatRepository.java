@@ -18,6 +18,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Stateless(name = "flatRepository")
@@ -100,18 +101,19 @@ public class FlatRepository implements RemoteFlatRepositoryInterface {
         typedQuery.setFirstResult((int) offset);
         typedQuery.setMaxResults((int) offset + pageRequest.getSize());
 
-        List<Flat> flats = typedQuery.getResultList();
+        Flat[] flats = typedQuery.getResultList().toArray(new Flat[0]);
 
         long flatsNum = getFlatsNum(spec);
         long pages = (long) Math.ceil(((float) flatsNum) / pageRequest.getSize());
 
-        Pageable<FlatDto> pageable = new Pageable<FlatDto>(convert(flats), pageRequest.getPage(), flats.size(), pageRequest.getSize(), flatsNum, pages);
+        Pageable<FlatDto> pageable = new Pageable<FlatDto>(convert(flats), pageRequest.getPage(), flats.length, pageRequest.getSize(), flatsNum, pages);
         return pageable;
     }
 
 
-    public Iterable<FlatDto> findAll(FlatSpecification spec) {
-        return convert(buildQueryBySpec(spec, null).getResultList());
+    public FlatDto[] findAll(FlatSpecification spec) {
+        List<FlatDto> flatDtosList = convert(buildQueryBySpec(spec, null).getResultList());
+        return flatDtosList.toArray(new FlatDto[flatDtosList.size()]);
     }
 
     private TypedQuery<Flat> buildQueryBySpec(FlatSpecification spec, PageRequest pageRequest) {
@@ -139,6 +141,10 @@ public class FlatRepository implements RemoteFlatRepositoryInterface {
             flatDtos.add(flatDto);
         }
         return flatDtos;
+    }
+
+    private FlatDto[] convert(Flat[] flats) {
+        return Arrays.stream(flats).map(flat -> convert(flat)).toArray(FlatDto[]::new);
     }
 
     private FlatDto convert(Flat flat) {

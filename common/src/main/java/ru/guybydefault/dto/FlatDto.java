@@ -8,6 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.guybydefault.LocalDateTimeAdapter;
 import ru.guybydefault.domain.Furnish;
 import ru.guybydefault.domain.Transport;
 import ru.guybydefault.domain.View;
@@ -18,6 +19,8 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -73,4 +76,12 @@ public class FlatDto implements Serializable {
     public boolean isNew() {
         return id == 0;
     }
+
+    @XmlJavaTypeAdapter(LocalDateTimeAdapter.class)
+    @XmlElement(name = "creationDate", required = true)
+    public LocalDateTime getCreationDate() {
+        return creationDate;
+    }
+
+
 }
