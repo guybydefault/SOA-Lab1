@@ -12,6 +12,7 @@ import {ToastService} from "../service/toast.service";
 export class FlatTableComponent implements OnInit {
 
   @Output() public flatDeleted: EventEmitter<Flat> = new EventEmitter<Flat>();
+  @Output() public flatCompared: EventEmitter<Flat> = new EventEmitter<Flat>();
 
   @Input() flats: Flat[]
   @Input() flatForm: FlatFormComponent
@@ -60,6 +61,7 @@ export class FlatTableComponent implements OnInit {
       this.flatService.findCheapest(this.compareFlats[0], this.compareFlats[1]).subscribe(value => {
         this.toastService.showSuccess("Comparison between flats #" + this.compareFlats[0].id + " and #" + this.compareFlats[1].id + " has been made.")
         this.compareFlats[2] = value;
+        this.flatCompared.emit(value);
       }, error => {
         this.toastService.showError(`Server returned error (${error.status}: ${error.statusText})`);
       })

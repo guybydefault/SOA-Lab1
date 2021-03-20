@@ -9,13 +9,16 @@ public class LocalDateTimeAdapter extends XmlAdapter<String, LocalDateTime> {
 
 
     public String marshal(LocalDateTime val) throws Exception {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
         return val.format(formatter);
     }
 
 
     public LocalDateTime unmarshal(String val) throws Exception {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        if (val.trim().isEmpty()) {
+            return null;
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
         return LocalDateTime.parse(val, formatter);
     }
 }

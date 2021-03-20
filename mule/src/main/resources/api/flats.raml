@@ -1,0 +1,81 @@
+#%RAML 1.0
+title: Flats api
+baseUri: http://localhost:8081/api
+version: 1.0
+
+/flats:
+  displayName: Flats
+  get:
+    queryParameters:
+      page:
+        required: false
+      size:
+        required: false
+      sort:
+        required: false
+      filter:
+        required: false
+    responses:
+      200:
+        body:
+          application/json:
+            example: |
+              [{"area":50.0,"coordinates":{"x":3,"y":1.56},"creationDate":"2020-10-17T10:42:18.572","furnish":"LITTLE","house":{"name":"Housee","numberOfFlatsOnFloor":10,"numberOfFloors":20,"numberOfLifts":2,"year":1998},"id":19,"name":"Name","new":false,"numberOfRooms":5,"transport":"FEW","view":"GOOD"}]
+  post:
+    body:
+      application/json:
+        example: |
+          {"area":50.0,"coordinates":{"x":3,"y":1.56},"creationDate":"2020-10-17T10:42:18.572","furnish":"LITTLE","house":{"name":"Housee","numberOfFlatsOnFloor":10,"numberOfFloors":20,"numberOfLifts":2,"year":1998},"id":0,"name":"Name","new":false,"numberOfRooms":5,"transport":"FEW","view":"GOOD"}
+    responses:
+        200:
+          body:
+            application/json:
+              example: |
+                {"area":50.0,"coordinates":{"x":3,"y":1.56},"creationDate":"2021-03-18T19:35:56.61","furnish":"LITTLE","house":{"name":"Housee","numberOfFlatsOnFloor":10,"numberOfFloors":20,"numberOfLifts":2,"year":1998},"id":85,"name":"Name","new":false,"numberOfRooms":5,"transport":"FEW","view":"GOOD"}
+  /{id}:
+    delete:
+    put:
+      body:
+        application/json:
+          example: |
+            {"area":50.0,"coordinates":{"x":3,"y":1.56},"creationDate":"2020-10-17T10:42:18.572","furnish":"LITTLE","house":{"name":"Housee","numberOfFlatsOnFloor":10,"numberOfFloors":20,"numberOfLifts":2,"year":1998},"id":0,"name":"Name","new":false,"numberOfRooms":5,"transport":"FEW","view":"GOOD"}
+      responses:
+        200:
+          body:
+            application/json:
+              example: |
+                {"area":50.0,"coordinates":{"x":3,"y":1.56},"creationDate":"2021-03-18T19:35:56.61","furnish":"LITTLE","house":{"name":"Housee","numberOfFlatsOnFloor":10,"numberOfFloors":20,"numberOfLifts":2,"year":1998},"id":85,"name":"Name","new":false,"numberOfRooms":5,"transport":"FEW","view":"GOOD"}
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              example: |
+                {"area":50.0,"coordinates":{"x":3,"y":1.56},"creationDate":"2021-03-18T19:35:56.61","furnish":"LITTLE","house":{"name":"Housee","numberOfFlatsOnFloor":10,"numberOfFloors":20,"numberOfLifts":2,"year":1998},"id":85,"name":"Name","new":false,"numberOfRooms":5,"transport":"FEW","view":"GOOD"}
+  /number-of-rooms/average:
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              example: |
+                1
+  /transport/max:
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              example: |
+                {"area":50.0,"coordinates":{"x":3,"y":1.56},"creationDate":"2021-03-18T19:35:56.61","furnish":"LITTLE","house":{"name":"Housee","numberOfFlatsOnFloor":10,"numberOfFloors":20,"numberOfLifts":2,"year":1998},"id":85,"name":"Name","new":false,"numberOfRooms":5,"transport":"FEW","view":"GOOD"}
+  /transport/greater-than:
+    get:
+      queryParameters:
+        value:
+          required: true
+      responses:
+        200:
+          body:
+            application/json:
+              example: |
+                4

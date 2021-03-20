@@ -11,13 +11,16 @@ import javax.jws.WebService;
 public interface IFlatEndpoint {
 
     @WebMethod
-    FlatDto findById(Integer id);
+    FlatDto findById(@WebParam(name = "id") Integer id);
 
     @WebMethod
     FlatDto[] findAll();
 
     @WebMethod
-    Pageable<FlatDto> findAllByParams(@WebParam Integer page, @WebParam Integer pageSize, @WebParam String filter, @WebParam String sort);
+    PageableFlats findAllByParams(@WebParam(name = "page") Integer page,
+                                  @WebParam(name = "size") Integer pageSize,
+                                  @WebParam(name = "filter") String filter,
+                                  @WebParam(name = "sort") String sort);
 
     @WebMethod
     long numberOfRoomsAverage();
@@ -26,10 +29,10 @@ public interface IFlatEndpoint {
     FlatDto anyFlatWithMaxTransport();
 
     @WebMethod
-    long transportGreaterThan(@WebParam Transport transport);
+    long transportGreaterThan(@WebParam(name = "value") Transport transport);
 
     @WebMethod
-    FlatDto saveFlat(@WebParam FlatDto flatDto);
+    FlatDto saveFlat(@WebParam(name = "flat") FlatDto flatDto);
 
     @WebMethod
     boolean deleteFlat(int id);

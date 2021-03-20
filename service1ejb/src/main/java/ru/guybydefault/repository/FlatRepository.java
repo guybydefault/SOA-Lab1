@@ -5,7 +5,7 @@ import ru.guybydefault.domain.Flat;
 import ru.guybydefault.domain.Transport;
 import ru.guybydefault.dto.FlatDto;
 import ru.guybydefault.web.PageRequest;
-import ru.guybydefault.web.Pageable;
+import ru.guybydefault.web.PageableFlats;
 import ru.guybydefault.web.filtering.FlatSpecification;
 
 import javax.ejb.Stateless;
@@ -94,7 +94,7 @@ public class FlatRepository implements RemoteFlatRepositoryInterface {
     }
 
     @Transactional
-    public Pageable<FlatDto> findAll(FlatSpecification spec, PageRequest pageRequest) {
+    public PageableFlats findAll(FlatSpecification spec, PageRequest pageRequest) {
         TypedQuery<Flat> typedQuery = buildQueryBySpec(spec, pageRequest);
         long offset = pageRequest.getPage() * pageRequest.getSize();
 
@@ -106,7 +106,7 @@ public class FlatRepository implements RemoteFlatRepositoryInterface {
         long flatsNum = getFlatsNum(spec);
         long pages = (long) Math.ceil(((float) flatsNum) / pageRequest.getSize());
 
-        Pageable<FlatDto> pageable = new Pageable<FlatDto>(convert(flats), pageRequest.getPage(), flats.length, pageRequest.getSize(), flatsNum, pages);
+        PageableFlats pageable = new PageableFlats(convert(flats), pageRequest.getPage(), flats.length, pageRequest.getSize(), flatsNum, pages);
         return pageable;
     }
 

@@ -1,0 +1,92 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="flat" format="java">
+      <types:shape format="raml"><![CDATA[#%RAML 1.0 DataType
+type: object
+properties:
+    house:
+        type: object
+        properties:
+          name: string]]></types:shape>
+    </types:type>
+    <types:type name="pageable" format="json">
+      <types:shape format="weave" example="examples/pageable.json"><![CDATA[%dw 2.0
+
+type pageable = {|
+  number: String, 
+  numberOfElements: String, 
+  size: String, 
+  totalElements: String, 
+  totalPages: String, 
+  content: Array<{|    area: Number {"typeId": "double"},     coordinates: {|      x: Number {"typeId": "int"},       y: Number {"typeId": "double"}    |},     creationDate: String,     furnish: String,     house: {|      name: String,       numberOfFlatsOnFloor: Number {"typeId": "int"},       numberOfFloors: Number {"typeId": "int"},       numberOfLifts: Number {"typeId": "int"},       year: Number {"typeId": "int"}    |},     id: Number {"typeId": "int"},     name: String,     new: Boolean,     numberOfRooms: Number {"typeId": "int"},     transport: String,     view: String  |}>
+|} {"example": "{\\\"number\\\":\\\"0\\\",\\\"numberOfElements\\\":\\\"1\\\",\\\"size\\\":\\\"1\\\",\\\"totalElements\\\":\\\"1\\\",\\\"totalPages\\\":\\\"1\\\",\\\"content\\\":[{\\\"area\\\":50.0,\\\"coordinates\\\":{\\\"x\\\":3,\\\"y\\\":1.56},\\\"creationDate\\\":\\\"2020-10-17T10:42:18.572\\\",\\\"furnish\\\":\\\"LITTLE\\\",\\\"house\\\":{\\\"name\\\":\\\"Housee\\\",\\\"numberOfFlatsOnFloor\\\":10,\\\"numberOfFloors\\\":20,\\\"numberOfLifts\\\":2,\\\"year\\\":1998},\\\"id\\\":19,\\\"name\\\":\\\"Name\\\",\\\"new\\\":false,\\\"numberOfRooms\\\":5,\\\"transport\\\":\\\"FEW\\\",\\\"view\\\":\\\"GOOD\\\"},{\\\"area\\\":50.0,\\\"coordinates\\\":{\\\"x\\\":3,\\\"y\\\":1.56},\\\"creationDate\\\":\\\"2020-10-17T10:42:18.572\\\",\\\"furnish\\\":\\\"LITTLE\\\",\\\"house\\\":{\\\"name\\\":\\\"Housee\\\",\\\"numberOfFlatsOnFloor\\\":10,\\\"numberOfFloors\\\":20,\\\"numberOfLifts\\\":2,\\\"year\\\":1998},\\\"id\\\":19,\\\"name\\\":\\\"Name\\\",\\\"new\\\":false,\\\"numberOfRooms\\\":5,\\\"transport\\\":\\\"FEW\\\",\\\"view\\\":\\\"GOOD\\\"}]}"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="flatJson" format="json">
+      <types:shape format="weave" example="examples/flat-1.json"><![CDATA[%dw 2.0
+
+type flatJson = {|
+  area: Number {"typeId": "double"}, 
+  coordinates: {|
+    x: Number {"typeId": "int"}, 
+    y: Number {"typeId": "double"}
+  |}, 
+  creationDate: String, 
+  furnish: String, 
+  house: {|
+    name: String, 
+    numberOfFlatsOnFloor: Number {"typeId": "int"}, 
+    numberOfFloors: Number {"typeId": "int"}, 
+    numberOfLifts: Number {"typeId": "int"}, 
+    year: Number {"typeId": "int"}
+  |}, 
+  id: Number {"typeId": "int"}, 
+  name: String, 
+  new: Boolean, 
+  numberOfRooms: Number {"typeId": "int"}, 
+  transport: String, 
+  view: String
+|} {"example": "{\\\"area\\\":50.0,\\\"coordinates\\\":{\\\"x\\\":3,\\\"y\\\":1.56},\\\"creationDate\\\":\\\"2020-10-17T10:42:18.572\\\",\\\"furnish\\\":\\\"LITTLE\\\",\\\"house\\\":{\\\"name\\\":\\\"Housee\\\",\\\"numberOfFlatsOnFloor\\\":10,\\\"numberOfFloors\\\":20,\\\"numberOfLifts\\\":2,\\\"year\\\":1998},\\\"id\\\":0,\\\"name\\\":\\\"Name\\\",\\\"new\\\":false,\\\"numberOfRooms\\\":5,\\\"transport\\\":\\\"FEW\\\",\\\"view\\\":\\\"GOOD\\\"}"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#9cb69288-a067-431d-9c6c-e38fbab42b5d">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="pageable"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#e772a302-0330-4e8a-929c-526bfcd4d732">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="flat"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#dc3bb46f-5453-4ed4-b104-7f99e4766ace">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="flatJson"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#4c3ba9b8-932c-4472-83e0-2e1b0ae603b7">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="flatJson"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

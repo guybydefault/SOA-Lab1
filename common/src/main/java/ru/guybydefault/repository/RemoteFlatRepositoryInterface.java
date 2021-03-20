@@ -3,7 +3,7 @@ package ru.guybydefault.repository;
 import ru.guybydefault.domain.Transport;
 import ru.guybydefault.dto.FlatDto;
 import ru.guybydefault.web.PageRequest;
-import ru.guybydefault.web.Pageable;
+import ru.guybydefault.web.PageableFlats;
 import ru.guybydefault.web.filtering.FlatSpecification;
 
 import javax.ejb.Remote;
@@ -25,5 +25,5 @@ public interface RemoteFlatRepositoryInterface {
 
     public FlatDto[] findAll(FlatSpecification spec);
 
-    public Pageable<FlatDto> findAll(FlatSpecification spec, PageRequest pageRequest);
+    public PageableFlats findAll(FlatSpecification spec, PageRequest pageRequest);
 }

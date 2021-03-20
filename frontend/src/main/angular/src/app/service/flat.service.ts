@@ -7,8 +7,8 @@ import {FilterParam} from "../domain/filter-param";
 import {PageRequest} from "../domain/page-request";
 
 
-const baseUrl = 'http://localhost:10250/main/service1web-1.0/api/flats';
-const agencyUrl = 'https://localhost:10250/agency/service2web-0.0.1-SNAPSHOT/agency'
+const baseUrl = 'http://localhost:10250/api/flats';
+const agencyUrl = 'http://localhost:10250/s2'
 
 @Injectable({
   providedIn: 'root'
@@ -23,13 +23,24 @@ export class FlatService {
     let params = new HttpParams();
     //TODO encode URI
 
+    let sortParamsStr = ""
     for (let sortParam of sortParams) {
-      params = params.append('sort', sortParam.field.property + ',' + sortParam.order);
+      if (sortParamsStr !== "") {
+        sortParamsStr = sortParamsStr + ";"
+      }
+      sortParamsStr = sortParamsStr + sortParam.field.property + ',' + sortParam.order;
+    }
+    params = params.append('sort', sortParamsStr);
+
+    let filterParamsStr = ""
+    for (let filterParam of filterParams) {
+      if (filterParamsStr !== "") {
+        filterParamsStr = filterParamsStr + ";"
+      }
+      filterParamsStr = filterParamsStr + filterParam.field.property + ',' + filterParam.operation.operation + ',' + filterParam.value;
     }
 
-    for (let filterParam of filterParams) {
-      params = params.append('filter', filterParam.field.property + ',' + filterParam.operation.operation + ',' + filterParam.value)
-    }
+    params = params.append('filter', filterParamsStr);
 
     params = params.append('page', pageRequest.pageIndex.toString())
     params = params.append('size', pageRequest.size.toString())

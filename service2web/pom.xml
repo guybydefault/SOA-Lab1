@@ -19,8 +19,6 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <spring-cloud.version>Hoxton.SR10</spring-cloud.version>
-        <cloud.version>1.4.7.RELEASE</cloud.version>
         <deploy.jboss.host>127.0.0.1</deploy.jboss.host>
         <deploy.jboss.port>12153</deploy.jboss.port>
         <deploy.jboss.username>adm</deploy.jboss.username>
@@ -28,14 +26,6 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-netflix-ribbon</artifactId>
-        </dependency>
         <dependency>
             <groupId>ru.guybydefault</groupId>
             <artifactId>common</artifactId>
@@ -73,18 +63,6 @@
             <optional>true</optional>
         </dependency>
     </dependencies>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-dependencies</artifactId>
-                <version>${spring-cloud.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <build>
         <plugins>

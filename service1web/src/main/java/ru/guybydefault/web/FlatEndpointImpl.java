@@ -58,13 +58,13 @@ public class FlatEndpointImpl implements IFlatEndpoint {
     }
 
     @Override
-    public Pageable<FlatDto> findAllByParams(Integer pageParam, Integer pageSizeParam, String filter, String sort) {
-        Integer page = Optional.of(pageParam).orElse(0);
-        Integer size = Optional.of(pageSizeParam).orElse(20);
-        String[] filterParams = filter.split("&");
-        String[] sortParams = sort.split("&");
+    public PageableFlats findAllByParams(Integer pageParam, Integer sizeParam, String filter, String sort) {
+        Integer page = Optional.ofNullable(pageParam).orElse(0);
+        Integer size = Optional.ofNullable(sizeParam).orElse(20);
+        String[] filterParams = filter.trim().length() > 0 ? filter.split(";") : new String[]{};
+        String[] sortParams = sort.trim().length() > 0 ? sort.split(";") : new String[]{};
         FlatSpecification flatSpecification = FlatSpecificationParser.parse(getCriteria(filterParams));
-        PageRequest pageRequest = parsePageRequest(size, page, sortParams);
+        PageRequest pageRequest = parsePageRequest(page, size, sortParams);
         return flatRepository.findAll(flatSpecification, pageRequest);
     }
 
@@ -86,7 +86,12 @@ public class FlatEndpointImpl implements IFlatEndpoint {
 
     @Override
     public FlatDto saveFlat(FlatDto flatDto) {
-        return flatRepository.save(flatDto);
+        if (flatDto.isNew()) {
+            return flatRepository.save(flatDto);
+        } else {
+            flatDto.setCreationDate(flatRepository.findById(flatDto.getId()).getCreationDate());
+            return flatRepository.save(flatDto);
+        }
     }
 
     @Override

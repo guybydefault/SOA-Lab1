@@ -1,0 +1,462 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+    <http:listener-config name="flats-httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="10250" />
+		<http:listener-interceptors >
+			<http:cors-interceptor >
+				<http:origins >
+					<http:public-resource />
+				</http:origins>
+			</http:cors-interceptor>
+		</http:listener-interceptors>
+    </http:listener-config>
+    <apikit:config name="flats-config" api="flats.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+	<wsc:config name="Web_Service_Consumer_Config" doc:name="Web Service Consumer Config" doc:id="a9acba26-c870-4580-b9df-f031188691e5" >
+		<wsc:connection wsdlLocation="http://localhost:10241/service1web-1.0/FlatEndpointImpl?wsdl" service="FlatEndpointImplService" port="FlatEndpointPort" address="http://localhost:10241/service1web-1.0/FlatEndpointImpl">
+			<wsc:web-service-security actor="http://schemas.xmlsoap.org/soap/actor/next" />
+		</wsc:connection>
+	</wsc:config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="fad04158-5e17-4b02-b4c0-8825869d21a1" >
+		<http:request-connection host="localhost" port="10261" />
+	</http:request-config>
+	<flow name="flatsFlow" doc:id="cff5bd6e-2e14-4929-892c-1db308e69763" >
+		<http:listener doc:name="Listener" doc:id="96dc84fa-8039-496d-863d-3622bc8f6c02" config-ref="flats-httpListenerConfig" path="/s2/*"/>
+		<logger level="INFO" doc:name="Logger" doc:id="152de49d-46ac-49eb-bc96-d9ee1bfc5a09" message="#[message.attributes.requestPath]"/>
+		<http:request method="#[(message.attributes.method)]" doc:name="Request" doc:id="2296d2bb-dbc8-48b1-9487-de7e16fb579a" config-ref="HTTP_Request_configuration" path="#[(message.attributes.'requestPath') replace (&quot;/s2&quot;) with(&quot;/service2web-0.0.1-SNAPSHOT/agency&quot;)]"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="25080f24-30e7-4b2e-9787-4d208df6a4a7" >
+				<set-payload value="#[error.description]" doc:name="Set Payload" doc:id="56168ec1-6be8-476f-9d4a-6e660edff6c8" />
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="flats-main">
+        <http:listener config-ref="flats-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="flats-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="flats-console">
+        <http:listener config-ref="flats-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="flats-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="delete:\flats\(id):flats-config">
+		<ee:transform doc:name="Transform Message" doc:id="482a05b1-086c-417c-bb3e-f460c4f1fdc6" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://web.guybydefault.ru/
+---
+{
+	ns0#deleteFlat: {
+		arg0: attributes.uriParams.id as Number
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<wsc:consume operation="deleteFlat" doc:name="Consume" doc:id="3ccc6fcf-7006-42f9-90ca-8e7db1d42383" config-ref="Web_Service_Consumer_Config"/>
+		<ee:transform doc:name="Transform Message" doc:id="1a01dd9d-2a95-4251-aa7e-e64f3b9c31d4" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+ns ns0 http://web.guybydefault.ru/
+---
+result: payload.body.ns0#deleteFlatResponse.return]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+    </flow>
+    <flow name="get:\flats\number-of-rooms\average:flats-config">
+        <wsc:consume operation="numberOfRoomsAverage" doc:name="Consume" doc:id="49948471-9d72-4668-9d60-4c0f3c79146b" config-ref="Web_Service_Consumer_Config"/>
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+ns ns0 http://web.guybydefault.ru/
+---
+payload.body.ns0#numberOfRoomsAverageResponse.return]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="get:\flats\transport\greater-than:flats-config">
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://web.guybydefault.ru/
+---
+{
+	ns0#transportGreaterThan: {
+		value: attributes.queryParams.value
+	}
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<wsc:consume doc:name="Consume" doc:id="e25061f2-360c-4bd2-acb6-df451c04e0ca" config-ref="Web_Service_Consumer_Config" operation="transportGreaterThan"/>
+		<ee:transform doc:name="Transform Message" doc:id="79a15795-8c7a-4eda-bcbd-8c62f6e712fe" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+ns ns0 http://web.guybydefault.ru/
+---
+payload.body.ns0#transportGreaterThanResponse.return]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+    </flow>
+    <flow name="get:\flats\transport\max:flats-config">
+		<wsc:consume doc:name="Consume" doc:id="22f0f9cf-e37e-4ef9-9cfb-fdaf846b656f" config-ref="Web_Service_Consumer_Config" operation="anyFlatWithMaxTransport"/>
+		<ee:transform doc:name="Transform Message" doc:id="cfba96d9-fead-41ae-a489-a6597f843fb1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+ns ns0 http://web.guybydefault.ru/
+---
+payload.body.ns0#anyFlatWithMaxTransportResponse.return]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+    </flow>
+    <flow name="get:\flats\(id):flats-config">
+        <ee:transform doc:name="Transform Message" doc:id="4cc8cc67-685f-42a9-9e1f-4caf4325084a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://web.guybydefault.ru/
+---
+{
+	ns0#findById: {
+		id: attributes.uriParams.id as Number
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<wsc:consume operation="findById" doc:name="Consume" doc:id="cf2d0824-451f-47b6-9712-ffb79756b7c4" config-ref="Web_Service_Consumer_Config"/>
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="e772a302-0330-4e8a-929c-526bfcd4d732">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+ns ns0 http://web.guybydefault.ru/
+---
+{
+	area: payload.body.ns0#findByIdResponse.return.area,
+	coordinates: {
+		x: payload.body.ns0#findByIdResponse.return.coordinates.x,
+		y: payload.body.ns0#findByIdResponse.return.coordinates.y
+	},
+	creationDate: payload.body.ns0#findByIdResponse.return.creationDate,
+	furnish: payload.body.ns0#findByIdResponse.return.furnish,
+	house: {
+		name: payload.body.ns0#findByIdResponse.return.house.name,
+		numberOfFlatsOnFloor: payload.body.ns0#findByIdResponse.return.house.numberOfFlatsOnFloor,
+		numberOfFloors: payload.body.ns0#findByIdResponse.return.house.numberOfFloors,
+		numberOfLifts: payload.body.ns0#findByIdResponse.return.house.numberOfLifts,
+		year: payload.body.ns0#findByIdResponse.return.house.year
+	},
+	id: payload.body.ns0#findByIdResponse.return.id,
+	name: payload.body.ns0#findByIdResponse.return.name,
+	numberOfRooms: payload.body.ns0#findByIdResponse.return.numberOfRooms,
+	transport: payload.body.ns0#findByIdResponse.return.transport,
+	view: payload.body.ns0#findByIdResponse.return.view
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="get:\flats:flats-config">
+        <logger level="INFO" doc:name="Logger" doc:id="59404b0f-7653-4eba-8cdc-608698a87bc0" message="#[payload]"/>
+		<choice doc:name="Choice" doc:id="c0742b4a-2e69-4c1b-b438-7d0aa93560d9" >
+			<when expression="#[attributes.queryParams.page != null or attributes.queryParams.size != null or attributes.queryParams.sort != null or attributes.queryParams.filter != null]">
+				<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://web.guybydefault.ru/
+---
+{
+	ns0#findAllByParams: {
+		page: attributes.queryParams.page as Number,
+		size: attributes.queryParams.size as Number,
+		filter: attributes.queryParams.filter,
+		sort: attributes.queryParams.sort
+	}
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+				<logger level="INFO" doc:name="Logger" doc:id="57ea9642-3ccb-4875-8e1f-b8f708baa992" message="#[payload]" />
+				<wsc:consume doc:name="Consume" doc:id="82a0f926-926b-428e-b42d-f2c67c0da2b0" config-ref="Web_Service_Consumer_Config" operation="findAllByParams" />
+				<logger level="INFO" doc:name="Logger" doc:id="a2accee3-5c9b-45be-835b-0a225710a436" message="#[payload]" />
+				<ee:transform doc:name="Transform Message" doc:id="9cb69288-a067-431d-9c6c-e38fbab42b5d">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+ns ns0 http://jaxws.soa4.com/
+ns ns01 http://web.guybydefault.ru/
+---
+{
+	content: payload.body.ns01#findAllByParamsResponse.return.*content map ( content , indexOfContent ) -> {
+		area: content.area,
+		coordinates: {
+			x: content.coordinates.x,
+			y: content.coordinates.y
+		},
+		creationDate: content.creationDate,
+		furnish: content.furnish,
+		house: {
+			name: content.house.name,
+			numberOfFlatsOnFloor: content.house.numberOfFlatsOnFloor,
+			numberOfFloors: content.house.numberOfFloors,
+			numberOfLifts: content.house.numberOfLifts,
+			year: content.house.year
+		},
+		id: content.id,
+		name: content.name,
+		numberOfRooms: content.numberOfRooms,
+		transport: content.transport,
+		view: content.view
+	},
+	number: payload.body.ns01#findAllByParamsResponse.return.number as Number,
+	numberOfElements: payload.body.ns01#findAllByParamsResponse.return.numberOfElements as Number,
+	size: payload.body.ns01#findAllByParamsResponse.return.size as Number,
+	totalElements: payload.body.ns01#findAllByParamsResponse.return.totalElements as Number,
+	totalPages: payload.body.ns01#findAllByParamsResponse.return.totalPages as Number
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</when>
+			<otherwise >
+				<wsc:consume operation="findAll" doc:name="Consume" doc:id="49ee79ce-f716-47f7-a66d-3c69ea240cfb" config-ref="Web_Service_Consumer_Config"/>
+				<ee:transform doc:name="Transform Message" doc:id="04334c33-8b2e-4590-8292-0bb09b5d13e2" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+ns ns0 http://web.guybydefault.ru/
+---
+payload.body.ns0#findAllResponse.*return]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+    </flow>
+    <flow name="post:\flats:application\json:flats-config">
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="dc3bb46f-5453-4ed4-b104-7f99e4766ace">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://web.guybydefault.ru/
+---
+{
+	ns0#saveFlat: {
+		flat: {
+			area: payload.area,
+			coordinates: payload.coordinates,
+			creationDate: payload.creationDate,
+			furnish: payload.furnish,
+			house: payload.house,
+			id: payload.id,
+			name: payload.name,
+			numberOfRooms: payload.numberOfRooms,
+			transport: payload.transport,
+			view: payload.view
+		}
+	}
+}
+]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<wsc:consume doc:name="Consume" doc:id="e7c294f7-1596-47c6-879c-b4df47921431" config-ref="Web_Service_Consumer_Config" operation="saveFlat"/>
+		<ee:transform doc:name="Transform Message" doc:id="5eb11376-fe12-49bd-907b-6b79f9a0aaef" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+ns ns0 http://web.guybydefault.ru/
+---
+{
+	area: payload.body.ns0#saveFlatResponse.return.area,
+	coordinates: {
+		x: payload.body.ns0#saveFlatResponse.return.coordinates.x,
+		y: payload.body.ns0#saveFlatResponse.return.coordinates.y
+	},
+	creationDate: payload.body.ns0#saveFlatResponse.return.creationDate,
+	furnish: payload.body.ns0#saveFlatResponse.return.furnish,
+	house: {
+		name: payload.body.ns0#saveFlatResponse.return.house.name,
+		numberOfFlatsOnFloor: payload.body.ns0#saveFlatResponse.return.house.numberOfFlatsOnFloor,
+		numberOfFloors: payload.body.ns0#saveFlatResponse.return.house.numberOfFloors,
+		numberOfLifts: payload.body.ns0#saveFlatResponse.return.house.numberOfLifts,
+		year: payload.body.ns0#saveFlatResponse.return.house.year
+	},
+	id: payload.body.ns0#saveFlatResponse.return.id,
+	name: payload.body.ns0#saveFlatResponse.return.name,
+	numberOfRooms: payload.body.ns0#saveFlatResponse.return.numberOfRooms,
+	transport: payload.body.ns0#saveFlatResponse.return.transport,
+	view: payload.body.ns0#saveFlatResponse.return.view
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+    </flow>
+	<flow name="put:\flats\(id):application\json:flats-config" doc:id="27592579-d8fa-4ca8-95ae-1523bdea9219" >
+		<ee:transform doc:name="Copy_of_Transform Message" doc:id="55a1b250-0239-4b13-b870-ed0daa75cc5e" xsi:schemaLocation="&#10;http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://web.guybydefault.ru/
+---
+{
+	ns0#saveFlat: {
+		flat: {
+			area: payload.area,
+			coordinates: payload.coordinates,
+			creationDate: payload.creationDate,
+			furnish: payload.furnish,
+			house: payload.house,
+			id: payload.id,
+			name: payload.name,
+			numberOfRooms: payload.numberOfRooms,
+			transport: payload.transport,
+			view: payload.view
+		}
+	}
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<wsc:consume operation="saveFlat" doc:name="Copy_of_Consume" doc:id="4dda2d44-032a-4e4e-87f5-e24241f21d9c" config-ref="Web_Service_Consumer_Config" />
+		<ee:transform doc:name="Copy_of_Transform Message" doc:id="6897d1a2-64c2-4276-8290-0062fdb56e06" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+ns ns0 http://web.guybydefault.ru/
+---
+{
+	area: payload.body.ns0#saveFlatResponse.return.area,
+	coordinates: {
+		x: payload.body.ns0#saveFlatResponse.return.coordinates.x,
+		y: payload.body.ns0#saveFlatResponse.return.coordinates.y
+	},
+	creationDate: payload.body.ns0#saveFlatResponse.return.creationDate,
+	furnish: payload.body.ns0#saveFlatResponse.return.furnish,
+	house: {
+		name: payload.body.ns0#saveFlatResponse.return.house.name,
+		numberOfFlatsOnFloor: payload.body.ns0#saveFlatResponse.return.house.numberOfFlatsOnFloor,
+		numberOfFloors: payload.body.ns0#saveFlatResponse.return.house.numberOfFloors,
+		numberOfLifts: payload.body.ns0#saveFlatResponse.return.house.numberOfLifts,
+		year: payload.body.ns0#saveFlatResponse.return.house.year
+	},
+	id: payload.body.ns0#saveFlatResponse.return.id,
+	name: payload.body.ns0#saveFlatResponse.return.name,
+	numberOfRooms: payload.body.ns0#saveFlatResponse.return.numberOfRooms,
+	transport: payload.body.ns0#saveFlatResponse.return.transport,
+	view: payload.body.ns0#saveFlatResponse.return.view
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

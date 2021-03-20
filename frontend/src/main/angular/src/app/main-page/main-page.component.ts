@@ -89,6 +89,10 @@ export class MainPageComponent implements OnInit {
     this.reloadFlats();
   }
 
+  flatCompared(flat: Flat) {
+    this.reloadFlats();
+  }
+
   flatEdited(flat: Flat) {
     this.reloadFlats();
   }

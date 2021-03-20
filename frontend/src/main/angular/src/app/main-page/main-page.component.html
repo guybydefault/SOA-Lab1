@@ -17,7 +17,7 @@
   </div>
   <div>
     <app-page-request *ngIf="showPagination()" (pageRequestUpdated)="pageRequestUpdated($event)" [page]="page"></app-page-request>
-    <app-flat-table (flatDeleted)="flatDeleted($event)" [flatForm]=flatForm [flats]="flats"></app-flat-table>
+    <app-flat-table (flatDeleted)="flatDeleted($event)" (flatCompared)="flatCompared($event)" [flatForm]=flatForm [flats]="flats"></app-flat-table>
   </div>
 </div>
 <app-toast aria-live="polite" aria-atomic="true"></app-toast>
